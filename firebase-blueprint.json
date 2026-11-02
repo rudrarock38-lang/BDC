@@ -1,0 +1,147 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "type": "object",
+      "description": "Student or Admin user profile",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "roll_number": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "student"] },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "name", "role"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "type": "object",
+      "description": "Curriculum Subject",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Topic": {
+      "title": "Topic",
+      "type": "object",
+      "description": "Sub-topic under a subject",
+      "properties": {
+        "id": { "type": "string" },
+        "subject_id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "subject_id", "name"]
+    },
+    "Question": {
+      "title": "Question",
+      "type": "object",
+      "description": "Question with options and bilingual texts",
+      "properties": {
+        "id": { "type": "string" },
+        "question_id_code": { "type": "string" },
+        "subject_id": { "type": "string" },
+        "topic_id": { "type": "string" },
+        "question_en": { "type": "string" },
+        "question_hi": { "type": "string" },
+        "option_a_en": { "type": "string" },
+        "option_b_en": { "type": "string" },
+        "option_c_en": { "type": "string" },
+        "option_d_en": { "type": "string" },
+        "correct_answer": { "type": "string", "enum": ["A", "B", "C", "D"] },
+        "difficulty": { "type": "string" },
+        "marks": { "type": "number" },
+        "negative_marks": { "type": "number" },
+        "explanation": { "type": "string" }
+      },
+      "required": ["id", "question_en", "correct_answer"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "type": "object",
+      "description": "CBT Examination definition",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "subject_id": { "type": "string" },
+        "total_questions": { "type": "number" },
+        "duration_minutes": { "type": "number" },
+        "positive_marks": { "type": "number" },
+        "negative_marks": { "type": "number" },
+        "is_active": { "type": "boolean" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "name", "duration_minutes", "total_questions"]
+    },
+    "ExamAttempt": {
+      "title": "ExamAttempt",
+      "type": "object",
+      "description": "A candidate test session",
+      "properties": {
+        "id": { "type": "string" },
+        "exam_id": { "type": "string" },
+        "student_id": { "type": "string" },
+        "start_time": { "type": "string" },
+        "end_time": { "type": "string" },
+        "status": { "type": "string", "enum": ["in_progress", "submitted", "terminated"] },
+        "tab_switches": { "type": "number" }
+      },
+      "required": ["id", "exam_id", "student_id", "status"]
+    },
+    "Result": {
+      "title": "Result",
+      "type": "object",
+      "description": "Evaluation scorecard of an exam attempt",
+      "properties": {
+        "id": { "type": "string" },
+        "attempt_id": { "type": "string" },
+        "exam_id": { "type": "string" },
+        "student_id": { "type": "string" },
+        "total_questions": { "type": "number" },
+        "attempted": { "type": "number" },
+        "correct": { "type": "number" },
+        "incorrect": { "type": "number" },
+        "score": { "type": "number" },
+        "percentage": { "type": "number" },
+        "passed": { "type": "boolean" }
+      },
+      "required": ["id", "attempt_id", "exam_id", "student_id", "score"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User accounts and roles"
+    },
+    "/subjects/{subjectId}": {
+      "schema": "Subject",
+      "description": "Exam subjects"
+    },
+    "/topics/{topicId}": {
+      "schema": "Topic",
+      "description": "Topics under subjects"
+    },
+    "/questions/{questionId}": {
+      "schema": "Question",
+      "description": "Bilingual question bank"
+    },
+    "/exams/{examId}": {
+      "schema": "Exam",
+      "description": "Published CBT tests"
+    },
+    "/exam_attempts/{attemptId}": {
+      "schema": "ExamAttempt",
+      "description": "Student live CBT test attempts"
+    },
+    "/results/{resultId}": {
+      "schema": "Result",
+      "description": "Completed attempt exam results"
+    }
+  }
+}

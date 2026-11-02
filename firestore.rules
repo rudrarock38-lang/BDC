@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'rudrarock38@gmail.com' ||
+        request.auth.token.email == 'admin@cbt.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // User profiles: strictly bounded, prevent client escalation of role or emailVerified
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+                    && request.resource.data.role == 'student'
+                    && (!('emailVerified' in request.resource.data) || request.resource.data.emailVerified == request.auth.token.email_verified);
+      allow update: if (isOwner(userId)
+                        && request.resource.data.role == resource.data.role
+                        && (!('emailVerified' in request.resource.data) || request.resource.data.emailVerified == request.auth.token.email_verified))
+                    || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Curriculum collections
+    match /subjects/{subjectId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /topics/{topicId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /questions/{questionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /exams/{examId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Exam attempts & results: protected features requiring verified email
+    match /exam_attempts/{attemptId} {
+      allow read: if isAuthenticated() && (resource.data.student_id == request.auth.uid || isAdmin());
+      allow create: if isEmailVerified() && request.resource.data.student_id == request.auth.uid;
+      allow update: if isEmailVerified() && (resource.data.student_id == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /results/{resultId} {
+      allow read: if isAuthenticated() && (resource.data.student_id == request.auth.uid || isAdmin());
+      allow create: if isEmailVerified() && request.resource.data.student_id == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system_health/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}

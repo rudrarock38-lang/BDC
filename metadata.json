@@ -1,0 +1,6 @@
+{
+  "name": "Pariksha CBT - Online Examination System",
+  "description": "Professional Computer Based Test (CBT) examination web platform featuring real-time test engine, bilingual support, instant server-side grading, and comprehensive administration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
